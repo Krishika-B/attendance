@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mobile Attendance Scanner</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body>
+  <h2>Scan Student ID</h2>
+  <div id="reader" style="width:300px;"></div>
+
+  <script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx9Nmyg6LSV9WkODnqEtueUGz2kIo5S0cHHVuyRchV5XX9kYMx1y2j0CINmSQRu0DUd/exec"; // Replace with your Apps Script URL
+
+    function sendAttendance(studentId) {
+      fetch(WEB_APP_URL, {
+        method: 'POST',
+        body: JSON.stringify({studentId, source: "mobile"}),
+        headers: {'Content-Type': 'application/json'}
+      })
+      .then(response => response.json())
+      .then(data => alert(data.status === "ok" ? "Attendance marked!" : "Error: " + data.message))
+      .catch(err => alert("Error: " + err));
+    }
+
+    function onScanSuccess(decodedText, decodedResult) {
+      // called when a barcode is successfully scanned
+      sendAttendance(decodedText);
+    }
+
+    let html5QrcodeScanner = new Html5Qrcode("reader");
+    html5QrcodeScanner.start(
+      { facingMode: "environment" }, // use back camera
+      {
+        fps: 10,    // frames per second
+        qrbox: 250  // size of scanning box
+      },
+      onScanSuccess
+    ).catch(err => console.log("Camera start error: ", err));
+  </script>
+</body>
+</html>
